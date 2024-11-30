@@ -23,9 +23,22 @@ void setup()
 
 void loop()
 {
+  M5.update();        // Required to update battery status
+  M5.Display.clear(); // Clear the display before drawing new content
+
+  float batteryLevel = M5.Power.getBatteryLevel();
+  bool isCharging = M5.Power.isCharging(); // Check if the device is charging
+
   M5.Display.setCursor(0, 20);
   M5.Display.printf("COUNT: %d\n", count);
+  M5.Display.printf("BATT: %.1f%%\n", batteryLevel);
+  M5.Display.printf("CHRG: %s\n", isCharging ? "Yes" : "No");
+
   Serial.printf("COUNT: %d\n", count);
+  Serial.printf("BATT: %.1f%%\n", batteryLevel);
+  Serial.printf("CHRG: %s\n", isCharging ? "Yes" : "No");
+
   count++;
+  count = count % 100;
   delay(1000);
 }
