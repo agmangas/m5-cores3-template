@@ -6,39 +6,57 @@
  * without modification, making code more portable and maintainable.
  */
 #include <M5Unified.h>
+#include "WiFiManager.h"
 
-uint32_t count;
+const float DISPLAY_TEXT_SIZE = 2;
+const unsigned long LOOP_DELAY_MS = 1000;
+
+WiFiManager wifiManager;
+
+void updateDisplay()
+{
+  M5.Display.clear();
+  M5.Display.setCursor(0, 20);
+
+  float batteryLevel = M5.Power.getBatteryLevel();
+  bool isCharging = M5.Power.isCharging();
+
+  M5.Display.printf("Battery: %.1f%%\n", batteryLevel);
+  M5.Display.printf("Charging: %s\n", isCharging ? F("Yes") : F("No"));
+
+  if (wifiManager.isConnected())
+  {
+    M5.Display.printf("IP: %s\n", wifiManager.getIP().c_str());
+    M5.Display.printf("SSID: %s\n", wifiManager.getSSID().c_str());
+  }
+  else
+  {
+    M5.Display.printf("WiFi: Disconnected\n");
+  }
+
+  Serial.printf("Battery: %.1f%%\n", batteryLevel);
+  Serial.printf("Charging: %s\n", isCharging ? F("Yes") : F("No"));
+  Serial.printf("WiFi: %s\n", wifiManager.isConnected() ? F("Connected") : F("Disconnected"));
+}
 
 void setup()
 {
+  Serial.println(F("Initializing..."));
+
   // M5.config() provides platform-specific initialization settings
   auto cfg = M5.config();
   M5.begin(cfg);
 
-  M5.Display.setTextSize(3);
-  M5.Display.print("Hello World!!!");
-  Serial.println("Hello World!!!");
-  count = 0;
+  M5.Display.setTextSize(DISPLAY_TEXT_SIZE);
+
+  M5.Display.print(F("Connecting to WiFi..."));
+  wifiManager.begin();
 }
 
 void loop()
 {
-  M5.update();        // Required to update battery status
-  M5.Display.clear(); // Clear the display before drawing new content
-
-  float batteryLevel = M5.Power.getBatteryLevel();
-  bool isCharging = M5.Power.isCharging(); // Check if the device is charging
-
-  M5.Display.setCursor(0, 20);
-  M5.Display.printf("COUNT: %d\n", count);
-  M5.Display.printf("BATT: %.1f%%\n", batteryLevel);
-  M5.Display.printf("CHRG: %s\n", isCharging ? "Yes" : "No");
-
-  Serial.printf("COUNT: %d\n", count);
-  Serial.printf("BATT: %.1f%%\n", batteryLevel);
-  Serial.printf("CHRG: %s\n", isCharging ? "Yes" : "No");
-
-  count++;
-  count = count % 100;
-  delay(1000);
+  wifiManager.update();
+  M5.update();
+  updateDisplay();
+  delay(LOOP_DELAY_MS);
 }
