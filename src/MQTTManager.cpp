@@ -70,3 +70,18 @@ bool MQTTManager::publish(const char *topic, const char *payload)
            mqttClient.print(payload) &&
            mqttClient.endMessage();
 }
+
+String MQTTManager::getBroker() const
+{
+    return broker;
+}
+
+int MQTTManager::getPort() const
+{
+    return port;
+}
+
+String MQTTManager::getClientId() const
+{
+    return clientId;
+}

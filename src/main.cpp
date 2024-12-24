@@ -38,7 +38,7 @@ void updateDisplay()
 
     if (mqttManager.isConnected())
     {
-        M5.Display.printf("MQTT: OK\n");
+        M5.Display.printf("MQTT: %s:%d\n", mqttManager.getBroker().c_str(), mqttManager.getPort());
     }
     else
     {

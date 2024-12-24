@@ -28,6 +28,9 @@ public:
     void update();
     bool isConnected() const;
     bool publish(const char *topic, const char *payload);
+    String getBroker() const;
+    int getPort() const;
+    String getClientId() const;
 
     MqttClient &getClient() { return mqttClient; }
 };
