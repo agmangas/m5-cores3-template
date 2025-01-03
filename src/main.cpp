@@ -8,12 +8,41 @@
 #include <M5Unified.h>
 #include "WiFiManager.h"
 #include "MQTTManager.h"
+#include "MFRC522_I2C.h"
+
+// If this is true the RFID module must be connected to the M5Stack
+const bool ENABLE_RFID = true;
 
 const float DISPLAY_TEXT_SIZE = 2;
 const unsigned long LOOP_DELAY_MS = 1000;
 
 WiFiManager wifiManager;
 MQTTManager mqttManager(wifiManager);
+
+// 0x28 is the default address of the MFRC522 module
+// If ENABLE_RFID is true, the RFID module should be connected to Port A of the M5Stack
+MFRC522 mfrc522(0x28);
+
+void printRFIDCard()
+{
+    if (!ENABLE_RFID)
+    {
+        return;
+    }
+
+    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial())
+    {
+        M5.Display.printf("Card: ");
+
+        for (byte i = 0; i < mfrc522.uid.size; i++)
+        {
+            M5.Display.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+            M5.Display.print(mfrc522.uid.uidByte[i], HEX);
+        }
+
+        M5.Display.printf("\n");
+    }
+}
 
 void updateDisplay()
 {
@@ -49,6 +78,8 @@ void updateDisplay()
     Serial.printf("Charging: %s\n", isCharging ? F("Yes") : F("No"));
     Serial.printf("WiFi: %s\n", wifiManager.isConnected() ? F("OK") : F("Disconnected"));
     Serial.printf("MQTT: %s\n", mqttManager.isConnected() ? F("OK") : F("Disconnected"));
+
+    printRFIDCard();
 }
 
 void setup()
@@ -61,12 +92,21 @@ void setup()
 
     M5.Display.setTextSize(DISPLAY_TEXT_SIZE);
 
-    M5.Display.print(F("Connecting to WiFi..."));
+    M5.Display.printf("Init I2C...\n");
+    Wire.begin();
+
+    if (ENABLE_RFID)
+    {
+        M5.Display.printf("Init MFRC522...\n");
+        mfrc522.PCD_Init();
+    }
+
+    M5.Display.printf("Connecting to WiFi...\n");
     wifiManager.begin();
 
     if (wifiManager.isConnected())
     {
-        M5.Display.print(F("Connecting to MQTT..."));
+        M5.Display.printf("Connecting to MQTT...\n");
         mqttManager.begin();
     }
 }
