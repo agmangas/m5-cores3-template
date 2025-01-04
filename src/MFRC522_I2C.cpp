@@ -2260,3 +2260,38 @@ bool MFRC522::PICC_ReadCardSerial()
     byte result = PICC_Select(&uid);
     return (result == STATUS_OK);
 } // End PICC_ReadCardSerial()
+
+/**
+ * Returns the UID of the card as a string.
+ * Returns an empty string if no card is present or if the card is not readable.
+ *
+ * @return String
+ */
+String MFRC522::getCardUidAsString()
+{
+    if (!PICC_IsNewCardPresent() || !PICC_ReadCardSerial())
+    {
+        return "";
+    }
+
+    String ret = "";
+
+    for (byte i = 0; i < uid.size; i++)
+    {
+        if (uid.uidByte[i] < 0x10)
+        {
+            // Add leading zero for single-digit hex values
+            ret += "0";
+        }
+
+        ret += String(uid.uidByte[i], HEX);
+
+        if (i < uid.size - 1)
+        {
+            // Add space between bytes except for the last one
+            ret += " ";
+        }
+    }
+
+    return ret;
+}

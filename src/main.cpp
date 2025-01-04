@@ -30,18 +30,14 @@ void printRFIDCard()
         return;
     }
 
-    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial())
+    String uid = mfrc522.getCardUidAsString();
+
+    if (uid.isEmpty())
     {
-        M5.Display.printf("Card: ");
-
-        for (byte i = 0; i < mfrc522.uid.size; i++)
-        {
-            M5.Display.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-            M5.Display.print(mfrc522.uid.uidByte[i], HEX);
-        }
-
-        M5.Display.printf("\n");
+        return;
     }
+
+    M5.Display.printf("Card: %s\n", uid.c_str());
 }
 
 void updateDisplay()

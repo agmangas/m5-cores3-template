@@ -157,7 +157,7 @@ public:
         BitFramingReg = 0x0D, // adjustments for bit-oriented frames
         CollReg = 0x0E,       // bit position of the first bit-collision detected on
                               // the RF interface
-        //						  0x0F			// reserved for future use
+                              //						  0x0F			// reserved for future use
 
         // Page 1: Command
         // 						  0x10			// reserved for future use
@@ -171,13 +171,13 @@ public:
         RxSelReg = 0x17,       // selects internal receiver settings
         RxThresholdReg = 0x18, // selects thresholds for the bit decoder
         DemodReg = 0x19,       // defines demodulator settings
-        // 						  0x1A			// reserved for future use
-        // 						  0x1B			// reserved for future use
+                               // 						  0x1A			// reserved for future use
+                               // 						  0x1B			// reserved for future use
         MfTxReg =
             0x1C, // controls some MIFARE communication transmit parameters
         MfRxReg =
             0x1D, // controls some MIFARE communication receive parameters
-        // 						  0x1E			// reserved for future use
+                  // 						  0x1E			// reserved for future use
         SerialSpeedReg =
             0x1F, // selects the speed of the serial UART interface
 
@@ -187,8 +187,8 @@ public:
             0x21, // shows the MSB and LSB values of the CRC calculation
         CRCResultRegL = 0x22,
         // 						  0x23			// reserved for future use
-        ModWidthReg = 0x24, // controls the ModWidth setting?
-        // 						  0x25			// reserved for future use
+        ModWidthReg = 0x24,   // controls the ModWidth setting?
+                              // 						  0x25			// reserved for future use
         RFCfgReg = 0x26,      // configures the receiver gain
         GsNReg = 0x27,        // selects the conductance of the antenna driver pins
                               // TX1 and TX2 for modulation
@@ -218,10 +218,10 @@ public:
         TestDAC1Reg = 0x39,     // defines the test value for TestDAC1
         TestDAC2Reg = 0x3A,     // defines the test value for TestDAC2
         TestADCReg = 0x3B       // shows the value of ADC I and Q channels
-        // 						  0x3C			// reserved for production tests
-        // 						  0x3D			// reserved for production tests
-        // 						  0x3E			// reserved for production tests
-        // 						  0x3F			// reserved for production tests
+                                // 						  0x3C			// reserved for production tests
+                                // 						  0x3D			// reserved for production tests
+                                // 						  0x3E			// reserved for production tests
+                                // 						  0x3F			// reserved for production tests
     };
 
     // MFRC522 commands. Described in chapter 10 of the datasheet.
@@ -277,21 +277,21 @@ public:
                               // state IDLE to go to READY and prepare for
                               // anticollision or selection. 7 bit frame.
         PICC_CMD_WUPA =
-            0x52,                // Wake-UP command, Type A. Invites PICCs in state IDLE and
-                                 // HALT to go to READY(*) and prepare for anticollision or
-                                 // selection. 7 bit frame.
-        PICC_CMD_CT = 0x88,      // Cascade Tag. Not really a command, but used
-                                 // during anti collision.
-        PICC_CMD_SEL_CL1 = 0x93, // Anti collision/Select, Cascade Level 1
-        PICC_CMD_SEL_CL2 = 0x95, // Anti collision/Select, Cascade Level 2
-        PICC_CMD_SEL_CL3 = 0x97, // Anti collision/Select, Cascade Level 3
-        PICC_CMD_HLTA = 0x50,    // HaLT command, Type A. Instructs an ACTIVE PICC
-                                 // to go to state HALT.
-        // The commands used for MIFARE Classic (from
-        // http://www.nxp.com/documents/data_sheet/MF1S503x.pdf, Section 9)
-        // Use PCD_MFAuthent to authenticate access to a sector, then use these
-        // commands to read/write/modify the blocks on the sector.
-        // The read/write commands can also be used for MIFARE Ultralight.
+            0x52,                      // Wake-UP command, Type A. Invites PICCs in state IDLE and
+                                       // HALT to go to READY(*) and prepare for anticollision or
+                                       // selection. 7 bit frame.
+        PICC_CMD_CT = 0x88,            // Cascade Tag. Not really a command, but used
+                                       // during anti collision.
+        PICC_CMD_SEL_CL1 = 0x93,       // Anti collision/Select, Cascade Level 1
+        PICC_CMD_SEL_CL2 = 0x95,       // Anti collision/Select, Cascade Level 2
+        PICC_CMD_SEL_CL3 = 0x97,       // Anti collision/Select, Cascade Level 3
+        PICC_CMD_HLTA = 0x50,          // HaLT command, Type A. Instructs an ACTIVE PICC
+                                       // to go to state HALT.
+                                       // The commands used for MIFARE Classic (from
+                                       // http://www.nxp.com/documents/data_sheet/MF1S503x.pdf, Section 9)
+                                       // Use PCD_MFAuthent to authenticate access to a sector, then use these
+                                       // commands to read/write/modify the blocks on the sector.
+                                       // The read/write commands can also be used for MIFARE Ultralight.
         PICC_CMD_MF_AUTH_KEY_A = 0x60, // Perform authentication with Key A
         PICC_CMD_MF_AUTH_KEY_B = 0x61, // Perform authentication with Key B
         PICC_CMD_MF_READ =
@@ -311,11 +311,11 @@ public:
                                      // internal data register.
         PICC_CMD_MF_TRANSFER = 0xB0, // Writes the contents of the internal
                                      // data register to a block.
-        // The commands used for MIFARE Ultralight (from
-        // http://www.nxp.com/documents/data_sheet/MF0ICU1.pdf, Section 8.6)
-        // The PICC_CMD_MF_READ and PICC_CMD_MF_WRITE can also be used for
-        // MIFARE Ultralight.
-        PICC_CMD_UL_WRITE = 0xA2 // Writes one 4 byte page to the PICC.
+                                     // The commands used for MIFARE Ultralight (from
+                                     // http://www.nxp.com/documents/data_sheet/MF0ICU1.pdf, Section 8.6)
+                                     // The PICC_CMD_MF_READ and PICC_CMD_MF_WRITE can also be used for
+                                     // MIFARE Ultralight.
+        PICC_CMD_UL_WRITE = 0xA2     // Writes one 4 byte page to the PICC.
     };
 
     // MIFARE constants that does not fit anywhere else
@@ -471,6 +471,7 @@ public:
     /////////////////////////////////////////////////////////////////////////////////////
     bool PICC_IsNewCardPresent();
     bool PICC_ReadCardSerial();
+    String getCardUidAsString();
 
 private:
     byte _chipAddress;
