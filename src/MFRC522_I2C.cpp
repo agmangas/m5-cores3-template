@@ -2285,12 +2285,6 @@ String MFRC522::getCardUidAsString()
         }
 
         ret += String(uid.uidByte[i], HEX);
-
-        if (i < uid.size - 1)
-        {
-            // Add space between bytes except for the last one
-            ret += " ";
-        }
     }
 
     return ret;
