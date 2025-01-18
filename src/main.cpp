@@ -87,6 +87,7 @@ void updateDisplay()
 
 void setup()
 {
+    Serial.begin(115200);
     Serial.println(F("Initializing..."));
 
     // M5.config() provides platform-specific initialization settings
