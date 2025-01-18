@@ -15,6 +15,7 @@ const bool ENABLE_RFID = true;
 
 const float DISPLAY_TEXT_SIZE = 2;
 const unsigned long LOOP_DELAY_MS = 1000;
+const char *TEST_MQTT_TOPIC = "test/json/#";
 
 WiFiManager wifiManager;
 MQTTManager mqttManager(wifiManager);
@@ -22,6 +23,12 @@ MQTTManager mqttManager(wifiManager);
 // 0x28 is the default address of the MFRC522 module
 // If ENABLE_RFID is true, the RFID module should be connected to Port A of the M5Stack
 MFRC522 mfrc522(0x28);
+
+void onJsonMessage(MqttClient &mqttClient, const String &topic, JsonDocument &doc)
+{
+    Serial.printf("Received message on topic: %s\n", topic.c_str());
+    Serial.printf("Message: %s\n", doc.as<String>().c_str());
+}
 
 void printRFIDCard()
 {
@@ -104,6 +111,8 @@ void setup()
     {
         M5.Display.printf("Connecting to MQTT...\n");
         mqttManager.begin();
+        mqttManager.subscribe(TEST_MQTT_TOPIC);
+        mqttManager.onJsonMessage(onJsonMessage);
     }
 }
 

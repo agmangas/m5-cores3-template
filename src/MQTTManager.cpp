@@ -85,3 +85,71 @@ String MQTTManager::getClientId() const
 {
     return clientId;
 }
+
+bool MQTTManager::subscribe(const char *topic, uint8_t qos)
+{
+    if (!connected)
+    {
+        return false;
+    }
+
+    mqttClient.subscribe(topic, qos);
+    return true;
+}
+
+bool MQTTManager::unsubscribe(const char *topic)
+{
+    if (!connected)
+    {
+        return false;
+    }
+
+    mqttClient.unsubscribe(topic);
+    return true;
+}
+
+void MQTTManager::handleJsonMessage(int messageSize)
+{
+    if (!jsonMessageHandler)
+    {
+        Serial.println(F("Warning: No JSON message handler has been registered"));
+        return;
+    }
+
+    String payload;
+
+    while (mqttClient.available())
+    {
+        payload += (char)mqttClient.read();
+    }
+
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, payload);
+
+    if (error)
+    {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+    }
+
+    jsonMessageHandler(mqttClient, mqttClient.messageTopic(), doc);
+}
+
+void MQTTManager::onJsonMessage(void (*callback)(MqttClient &, const String &, JsonDocument &))
+{
+    if (jsonMessageHandler)
+    {
+        Serial.println(F("Warning: Cannot set JSON message handler - a handler is already registered"));
+        return;
+    }
+
+    jsonMessageHandler = callback;
+
+    // Warning: Static instance risks dangling pointer if MQTTManager instance is destroyed
+    // or callback redirection if new MQTTManager instance created
+    static MQTTManager *instance = this;
+
+    mqttClient.onMessage([](int messageSize)
+                         { instance->handleJsonMessage(messageSize); });
+}

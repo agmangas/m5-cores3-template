@@ -4,6 +4,7 @@
 #include <ArduinoMqttClient.h>
 #include "WiFiManager.h"
 #include "secrets.h"
+#include <ArduinoJson.h>
 
 class MQTTManager
 {
@@ -20,6 +21,8 @@ private:
     int connectionAttempts = 3;
     unsigned long connectionAttemptDelayMs = 1000;
     unsigned long keepAliveIntervalMs = 60;
+    std::function<void(MqttClient &, const String &, JsonDocument &)> jsonMessageHandler = nullptr;
+    void handleJsonMessage(int messageSize);
 
 public:
     MQTTManager(WiFiManager &wifiManager);
@@ -31,6 +34,9 @@ public:
     String getBroker() const;
     int getPort() const;
     String getClientId() const;
+    bool subscribe(const char *topic, uint8_t qos = 2);
+    bool unsubscribe(const char *topic);
+    void onJsonMessage(void (*callback)(MqttClient &, const String &, JsonDocument &));
 
     MqttClient &getClient() { return mqttClient; }
 };
