@@ -11,10 +11,9 @@
 #include "MFRC522_I2C.h"
 
 // If this is true the RFID module must be connected to the M5Stack
-const bool ENABLE_RFID = true;
+const bool ENABLE_RFID = false;
 
 const float DISPLAY_TEXT_SIZE = 2;
-const unsigned long LOOP_DELAY_MS = 1000;
 const char *TEST_MQTT_TOPIC = "test/json/#";
 
 WiFiManager wifiManager;
@@ -24,7 +23,7 @@ MQTTManager mqttManager(wifiManager);
 // If ENABLE_RFID is true, the RFID module should be connected to Port A of the M5Stack
 MFRC522 mfrc522(0x28);
 
-void onJsonMessage(MqttClient &mqttClient, const String &topic, JsonDocument &doc)
+void onJsonMessage(MQTTClient &mqttClient, const String &topic, JsonDocument &doc)
 {
     Serial.printf("Received message on topic: %s\n", topic.c_str());
     Serial.printf("Message: %s\n", doc.as<String>().c_str());
@@ -112,16 +111,24 @@ void setup()
     {
         M5.Display.printf("Connecting to MQTT...\n");
         mqttManager.begin();
-        mqttManager.subscribe(TEST_MQTT_TOPIC);
         mqttManager.onJsonMessage(onJsonMessage);
+        mqttManager.subscribe(TEST_MQTT_TOPIC, 0);
     }
 }
+
+unsigned long now = 0;
+const unsigned long printIntervalMs = 3000;
 
 void loop()
 {
     M5.update();
     wifiManager.update();
     mqttManager.update();
-    updateDisplay();
-    delay(LOOP_DELAY_MS);
+
+    if (millis() - now >= printIntervalMs)
+    {
+        updateDisplay();
+        now = millis();
+        mqttManager.publish("test/publish", "{\"value\":\"test\"}");
+    }
 }

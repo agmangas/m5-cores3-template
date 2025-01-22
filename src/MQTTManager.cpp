@@ -1,7 +1,7 @@
 #include "MQTTManager.h"
 
 MQTTManager::MQTTManager(WiFiManager &wifiManager)
-    : wifiManager(wifiManager), broker(MQTT_BROKER), port(MQTT_PORT), clientId(MQTT_CLIENT_ID), connected(false), lastReconnectAttempt(0), mqttClient(wifiClient)
+    : wifiManager(wifiManager), broker(MQTT_BROKER), port(MQTT_PORT), clientId(MQTT_CLIENT_ID), connected(false), lastReconnectAttempt(0), mqttClient(1024)
 {
 }
 
@@ -12,19 +12,17 @@ bool MQTTManager::begin()
         return false;
     }
 
-    mqttClient.setId(clientId);
-    mqttClient.setKeepAliveInterval(keepAliveIntervalMs);
+    mqttClient.begin(broker, port, wifiClient);
+    mqttClient.setKeepAlive(keepAliveIntervalMs);
 
     int attempts = 0;
-
-    while (!mqttClient.connect(broker, port) && attempts < connectionAttempts)
+    while (!mqttClient.connect(clientId) && attempts < connectionAttempts)
     {
         delay(connectionAttemptDelayMs);
         attempts++;
     }
 
     connected = mqttClient.connected();
-
     return connected;
 }
 
@@ -50,7 +48,7 @@ void MQTTManager::update()
     else
     {
         connected = true;
-        mqttClient.poll();
+        mqttClient.loop();
     }
 }
 
@@ -66,9 +64,7 @@ bool MQTTManager::publish(const char *topic, const char *payload)
         return false;
     }
 
-    return mqttClient.beginMessage(topic) &&
-           mqttClient.print(payload) &&
-           mqttClient.endMessage();
+    return mqttClient.publish(topic, payload);
 }
 
 String MQTTManager::getBroker() const
@@ -93,8 +89,7 @@ bool MQTTManager::subscribe(const char *topic, uint8_t qos)
         return false;
     }
 
-    mqttClient.subscribe(topic, qos);
-    return true;
+    return mqttClient.subscribe(topic, qos);
 }
 
 bool MQTTManager::unsubscribe(const char *topic)
@@ -104,23 +99,15 @@ bool MQTTManager::unsubscribe(const char *topic)
         return false;
     }
 
-    mqttClient.unsubscribe(topic);
-    return true;
+    return mqttClient.unsubscribe(topic);
 }
 
-void MQTTManager::handleJsonMessage(int messageSize)
+void MQTTManager::handleJsonMessage(String &topic, String &payload)
 {
     if (!jsonMessageHandler)
     {
         Serial.println(F("Warning: No JSON message handler has been registered"));
         return;
-    }
-
-    String payload;
-
-    while (mqttClient.available())
-    {
-        payload += (char)mqttClient.read();
     }
 
     JsonDocument doc;
@@ -133,10 +120,10 @@ void MQTTManager::handleJsonMessage(int messageSize)
         return;
     }
 
-    jsonMessageHandler(mqttClient, mqttClient.messageTopic(), doc);
+    jsonMessageHandler(mqttClient, topic, doc);
 }
 
-void MQTTManager::onJsonMessage(void (*callback)(MqttClient &, const String &, JsonDocument &))
+void MQTTManager::onJsonMessage(void (*callback)(MQTTClient &, const String &, JsonDocument &))
 {
     if (jsonMessageHandler)
     {
@@ -146,10 +133,6 @@ void MQTTManager::onJsonMessage(void (*callback)(MqttClient &, const String &, J
 
     jsonMessageHandler = callback;
 
-    // Warning: Static instance risks dangling pointer if MQTTManager instance is destroyed
-    // or callback redirection if new MQTTManager instance created
-    static MQTTManager *instance = this;
-
-    mqttClient.onMessage([](int messageSize)
-                         { instance->handleJsonMessage(messageSize); });
+    mqttClient.onMessage([this](String &topic, String &payload)
+                         { this->handleJsonMessage(topic, payload); });
 }
