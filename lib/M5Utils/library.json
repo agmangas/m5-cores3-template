@@ -1,0 +1,24 @@
+{
+  "name": "M5Utils",
+  "version": "0.1.0",
+  "description": "M5Stack utility libraries for WiFi, MQTT, and RFID",
+  "keywords": "m5stack, wifi, mqtt, rfid",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agmangas/m5-cores3-template.git"
+  },
+  "authors": [
+    {
+      "name": "Andres Garcia Mangas",
+      "email": "agmangas@gmail.com",
+      "url": "https://github.com/agmangas"
+    }
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bblanchon/ArduinoJson": "^7.3.0",
+    "256dpi/MQTT": "^2.5.2"
+  },
+  "frameworks": "arduino",
+  "platforms": "espressif32"
+}
