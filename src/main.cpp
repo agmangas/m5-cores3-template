@@ -14,7 +14,9 @@
 const bool ENABLE_RFID = false;
 
 const float DISPLAY_TEXT_SIZE = 2;
-const char *TEST_MQTT_TOPIC = "test/json/#";
+const char *TOPIC_SUBSCRIBE = "test/json/#";
+const char *TOPIC_PUBLISH = "test/publish/m5test";
+const unsigned long PRINT_INTERVAL_MS = 2000;
 
 WiFiManager wifiManager;
 MQTTManager mqttManager(wifiManager);
@@ -23,10 +25,20 @@ MQTTManager mqttManager(wifiManager);
 // If ENABLE_RFID is true, the RFID module should be connected to Port A of the M5Stack
 MFRC522 mfrc522(0x28);
 
+unsigned long now = 0;
+String publishedValue = "Hello World";
+JsonDocument doc;
+
 void onJsonMessage(MQTTClient &mqttClient, const String &topic, JsonDocument &doc)
 {
     Serial.printf("Received message on topic: %s\n", topic.c_str());
     Serial.printf("Message: %s\n", doc.as<String>().c_str());
+
+    if (doc["value"].is<String>())
+    {
+        Serial.printf("Received value: %s\n", doc["value"].as<String>().c_str());
+        publishedValue = doc["value"].as<String>();
+    }
 }
 
 void printRFIDCard()
@@ -89,7 +101,6 @@ void setup()
     Serial.begin(115200);
     Serial.println(F("Initializing..."));
 
-    // M5.config() provides platform-specific initialization settings
     auto cfg = M5.config();
     M5.begin(cfg);
 
@@ -112,12 +123,9 @@ void setup()
         M5.Display.printf("Connecting to MQTT...\n");
         mqttManager.begin();
         mqttManager.onJsonMessage(onJsonMessage);
-        mqttManager.subscribe(TEST_MQTT_TOPIC, 0);
+        mqttManager.subscribe(TOPIC_SUBSCRIBE, 0);
     }
 }
-
-unsigned long now = 0;
-const unsigned long printIntervalMs = 3000;
 
 void loop()
 {
@@ -125,10 +133,15 @@ void loop()
     wifiManager.update();
     mqttManager.update();
 
-    if (millis() - now >= printIntervalMs)
+    if (millis() - now >= PRINT_INTERVAL_MS)
     {
         updateDisplay();
         now = millis();
-        mqttManager.publish("test/publish", "{\"value\":\"test\"}");
+        doc.clear();
+        doc["value"] = publishedValue;
+        doc["now"] = now;
+        String payload;
+        serializeJson(doc, payload);
+        mqttManager.publish(TOPIC_PUBLISH, payload.c_str());
     }
 }

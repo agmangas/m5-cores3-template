@@ -21,6 +21,8 @@ private:
     int connectionAttempts = 10;
     unsigned long connectionAttemptDelayMs = 2000;
     unsigned long keepAliveIntervalMs = 60;
+    String subscribedTopic = "";
+    uint8_t subscribedQos = 0;
     std::function<void(MQTTClient &, const String &, JsonDocument &)> jsonMessageHandler = nullptr;
     void handleJsonMessage(String &topic, String &payload);
 

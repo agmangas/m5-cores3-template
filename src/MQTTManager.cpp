@@ -23,6 +23,13 @@ bool MQTTManager::begin()
     }
 
     connected = mqttClient.connected();
+
+    if (connected)
+    {
+        Serial.printf("Subscribing to topic: %s with QoS: %d\n", subscribedTopic.c_str(), subscribedQos);
+        mqttClient.subscribe(subscribedTopic.c_str(), subscribedQos);
+    }
+
     return connected;
 }
 
@@ -64,7 +71,8 @@ bool MQTTManager::publish(const char *topic, const char *payload)
         return false;
     }
 
-    return mqttClient.publish(topic, payload);
+    bool retained = false;
+    return mqttClient.publish(topic, payload, retained, 0);
 }
 
 String MQTTManager::getBroker() const
@@ -84,8 +92,23 @@ String MQTTManager::getClientId() const
 
 bool MQTTManager::subscribe(const char *topic, uint8_t qos)
 {
+    if (subscribedTopic.equals(topic))
+    {
+        Serial.printf("Already subscribed to topic: %s\n", subscribedTopic.c_str());
+        return true;
+    }
+    else if (!subscribedTopic.isEmpty() && !subscribedTopic.equals(topic))
+    {
+        Serial.printf("Could not subscribe to topic - already subscribed to: %s\n", subscribedTopic.c_str());
+        return false;
+    }
+
+    subscribedTopic = topic;
+    subscribedQos = qos;
+
     if (!connected)
     {
+        Serial.printf("Could not subscribe to topic - not connected\n");
         return false;
     }
 
@@ -94,6 +117,9 @@ bool MQTTManager::subscribe(const char *topic, uint8_t qos)
 
 bool MQTTManager::unsubscribe(const char *topic)
 {
+    subscribedTopic = "";
+    subscribedQos = 0;
+
     if (!connected)
     {
         return false;
