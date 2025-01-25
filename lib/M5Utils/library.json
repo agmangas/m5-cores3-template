@@ -1,6 +1,6 @@
 {
   "name": "M5Utils",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "M5Stack utility libraries for WiFi, MQTT, and RFID",
   "keywords": "m5stack, wifi, mqtt, rfid",
   "repository": {
