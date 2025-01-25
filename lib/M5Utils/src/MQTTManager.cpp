@@ -24,7 +24,7 @@ bool MQTTManager::begin()
 
     connected = mqttClient.connected();
 
-    if (connected)
+    if (connected && !subscribedTopic.isEmpty())
     {
         Serial.printf("Subscribing to topic: %s with QoS: %d\n", subscribedTopic.c_str(), subscribedQos);
         mqttClient.subscribe(subscribedTopic.c_str(), subscribedQos);
