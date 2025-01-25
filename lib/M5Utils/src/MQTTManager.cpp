@@ -72,7 +72,16 @@ bool MQTTManager::publish(const char *topic, const char *payload)
     }
 
     bool retained = false;
-    return mqttClient.publish(topic, payload, retained, 0);
+    bool success = mqttClient.publish(topic, payload, retained, 0);
+
+    if (!success)
+    {
+        Serial.printf("Could not publish message - failed\n");
+        mqttClient.disconnect();
+        connected = false;
+    }
+
+    return success;
 }
 
 String MQTTManager::getBroker() const
@@ -112,7 +121,16 @@ bool MQTTManager::subscribe(const char *topic, uint8_t qos)
         return false;
     }
 
-    return mqttClient.subscribe(topic, qos);
+    bool success = mqttClient.subscribe(topic, qos);
+
+    if (!success)
+    {
+        Serial.printf("Could not subscribe to topic - failed\n");
+        mqttClient.disconnect();
+        connected = false;
+    }
+
+    return success;
 }
 
 bool MQTTManager::unsubscribe(const char *topic)
