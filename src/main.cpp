@@ -17,7 +17,7 @@ const bool ENABLE_RFID = false;
 const float DISPLAY_TEXT_SIZE = 2;
 const char *TOPIC_SUBSCRIBE = "test/json/#";
 const char *TOPIC_PUBLISH = "test/publish/m5test";
-const unsigned long PRINT_INTERVAL_MS = 2000;
+const unsigned long PRINT_INTERVAL_MS = 3000;
 
 WiFiManager wifiManager;
 MQTTManager mqttManager(wifiManager);
@@ -134,7 +134,7 @@ void setup()
     mqttManager.onJsonMessage(onJsonMessage);
     mqttManager.subscribe(TOPIC_SUBSCRIBE);
 
-    M5.Display.printf("Connecting to UDP...\n");
+    M5.Display.printf("Initializing UDP...\n");
     udpManager.begin();
 }
 
@@ -155,5 +155,11 @@ void loop()
         String payload;
         serializeJson(doc, payload);
         mqttManager.publish(TOPIC_PUBLISH, payload.c_str());
+    }
+
+    if (udpManager.isInitialized() && udpManager.parsePacket() > 0)
+    {
+        String message = udpManager.readString();
+        M5.Display.printf("UDP msg: %s\n", message.c_str());
     }
 }
