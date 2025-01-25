@@ -8,6 +8,7 @@
 #include <M5Unified.h>
 #include "WiFiManager.h"
 #include "MQTTManager.h"
+#include "UDPManager.h"
 #include "MFRC522_I2C.h"
 
 // If this is true the RFID module must be connected to the M5Stack
@@ -20,6 +21,7 @@ const unsigned long PRINT_INTERVAL_MS = 2000;
 
 WiFiManager wifiManager;
 MQTTManager mqttManager(wifiManager);
+UDPManager udpManager(wifiManager);
 
 // 0x28 is the default address of the MFRC522 module
 // If ENABLE_RFID is true, the RFID module should be connected to Port A of the M5Stack
@@ -88,6 +90,15 @@ void updateDisplay()
         M5.Display.printf("MQTT: Disconnected\n");
     }
 
+    if (udpManager.isInitialized())
+    {
+        M5.Display.printf("UDP: %d\n", udpManager.getLocalPort());
+    }
+    else
+    {
+        M5.Display.printf("UDP: Uninitialized\n");
+    }
+
     Serial.printf("Battery: %.1f%%\n", batteryLevel);
     Serial.printf("Charging: %s\n", isCharging ? F("Yes") : F("No"));
     Serial.printf("WiFi: %s\n", wifiManager.isConnected() ? F("OK") : F("Disconnected"));
@@ -118,13 +129,13 @@ void setup()
     M5.Display.printf("Connecting to WiFi...\n");
     wifiManager.begin();
 
-    if (wifiManager.isConnected())
-    {
-        M5.Display.printf("Connecting to MQTT...\n");
-        mqttManager.begin();
-        mqttManager.onJsonMessage(onJsonMessage);
-        mqttManager.subscribe(TOPIC_SUBSCRIBE, 0);
-    }
+    M5.Display.printf("Connecting to MQTT...\n");
+    mqttManager.begin();
+    mqttManager.onJsonMessage(onJsonMessage);
+    mqttManager.subscribe(TOPIC_SUBSCRIBE);
+
+    M5.Display.printf("Connecting to UDP...\n");
+    udpManager.begin();
 }
 
 void loop()
@@ -132,6 +143,7 @@ void loop()
     M5.update();
     wifiManager.update();
     mqttManager.update();
+    udpManager.update();
 
     if (millis() - now >= PRINT_INTERVAL_MS)
     {
