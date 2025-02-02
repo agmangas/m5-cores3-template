@@ -2262,30 +2262,34 @@ bool MFRC522::PICC_ReadCardSerial()
 } // End PICC_ReadCardSerial()
 
 /**
- * Returns the UID of the card as a string.
- * Returns an empty string if no card is present or if the card is not readable.
+ * Writes the card's UID as a hex string into the provided buffer.
+ * Buffer must be at least (UID_SIZE * 2 + 1) bytes long to accommodate
+ * the hex string and null terminator.
  *
- * @return String
+ * @param buffer The char array to write the UID into
+ * @param bufferSize Size of the provided buffer
+ * @return true if successful, false if no card present or buffer too small
  */
-String MFRC522::getCardUidAsString()
+bool MFRC522::getCardUidAsString(char *buffer, size_t bufferSize)
 {
+    // Check for valid buffer
+    if (buffer == nullptr || bufferSize < (uid.size * 2 + 1))
+    {
+        return false;
+    }
+
+    // Check for card presence
     if (!PICC_IsNewCardPresent() || !PICC_ReadCardSerial())
     {
-        return "";
+        buffer[0] = '\0'; // Ensure null-terminated empty string
+        return false;
     }
 
-    String ret = "";
-
+    // Convert each byte to hex
     for (byte i = 0; i < uid.size; i++)
     {
-        if (uid.uidByte[i] < 0x10)
-        {
-            // Add leading zero for single-digit hex values
-            ret += "0";
-        }
-
-        ret += String(uid.uidByte[i], HEX);
+        sprintf(buffer + (i * 2), "%02X", uid.uidByte[i]);
     }
 
-    return ret;
+    return true;
 }

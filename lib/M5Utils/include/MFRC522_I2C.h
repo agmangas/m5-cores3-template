@@ -471,7 +471,10 @@ public:
     /////////////////////////////////////////////////////////////////////////////////////
     bool PICC_IsNewCardPresent();
     bool PICC_ReadCardSerial();
-    String getCardUidAsString();
+
+    // Maximum length of UID string including null terminator (7 bytes * 2 chars + null)
+    static const size_t MAX_RFID_UID_SIZE = 15;
+    bool getCardUidAsString(char *buffer, size_t bufferSize);
 
 private:
     byte _chipAddress;

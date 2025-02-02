@@ -30,6 +30,7 @@ MFRC522 mfrc522(0x28);
 unsigned long now = 0;
 String publishedValue = "Hello World";
 JsonDocument doc;
+char uidString[MFRC522::MAX_RFID_UID_SIZE];
 
 void onJsonMessage(MQTTClient &mqttClient, const String &topic, JsonDocument &doc)
 {
@@ -50,14 +51,17 @@ void printRFIDCard()
         return;
     }
 
-    String uid = mfrc522.getCardUidAsString();
-
-    if (uid.isEmpty())
+    if (!mfrc522.getCardUidAsString(uidString, sizeof(uidString)))
     {
         return;
     }
 
-    M5.Display.printf("Card: %s\n", uid.c_str());
+    if (strlen(uidString) == 0)
+    {
+        return;
+    }
+
+    M5.Display.printf("Card: %s\n", uidString);
 }
 
 void updateDisplay()
